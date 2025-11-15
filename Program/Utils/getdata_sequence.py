@@ -44,7 +44,11 @@ class getGraphDataSequence(G_Dataset):
             return [f'graphs_seq{SEQUENCE_LENGTH}_test.pkl']
 
     def process(self):
+        """
+        Membaca file .npz dan membuat 'sliding windows' dari frame.
+        """
         print(f"Processed sequence file not found. Starting processing for '{self.state}' data...")
+        
         all_sequences = []
         data_folder = self.data_path_raw
         
@@ -55,10 +59,16 @@ class getGraphDataSequence(G_Dataset):
             raise FileNotFoundError(f"No .npz files found in {data_folder}.")
 
         static_edge_index = None
+        file_counter = 0 # <-- TAMBAHAN: untuk melacak file
+
         for npz_path in npz_files:
-            print(f"Processing file: {npz_path}")
+            file_counter += 1
+            print(f"\n--- Processing file {file_counter}/{len(npz_files)} ---")
+            print(f"File: {npz_path}")
+            
             try:
                 data = np.load(npz_path, allow_pickle=True)
+                
                 nodes_all_frames = data['nodes']
                 labels_all_frames = data['y']
                 mask_all_frames = data['frame_mask']
@@ -69,7 +79,10 @@ class getGraphDataSequence(G_Dataset):
                     print(f"  > Loaded static edge index with shape: {static_edge_index.shape}")
                 
                 num_frames = nodes_all_frames.shape[0]
+                num_sequences_in_file = 0 # <-- TAMBAHAN: melacak sekuens
+                print(f"  > Found {num_frames} frames. Creating sliding windows...")
 
+                # --- Logika Sliding Window ---
                 for i in range(num_frames - SEQUENCE_LENGTH + 1):
                     end_index = i + SEQUENCE_LENGTH
                     window_nodes = nodes_all_frames[i : end_index]
@@ -88,12 +101,28 @@ class getGraphDataSequence(G_Dataset):
                         y=label_tensor
                     )
                     all_sequences.append(sequence_data)
+                    num_sequences_in_file += 1
+                
+                print(f"  > Done. Created {num_sequences_in_file} valid sequences from this file.")
+                        
             except Exception as e:
                 print(f"  ! Error processing file {npz_path}: {e}")
         
-        save_path = os.path.join(self.processed_dir, self.processed_file_names[0])
+        # --- TAMBAHAN: Pesan sebelum menyimpan ---
+        print("\n--------------------------------------------------")
+        print(f"All {len(npz_files)} files processed.")
+        print(f"Total sequences created: {len(all_sequences)}")
+        print("Now saving to .pkl file. INI AKAN MEMAKAN WAKTU LAMA...")
+        print("--------------------------------------------------")
+
+        if self.state == 'Training':
+            save_path = os.path.join(self.processed_dir, f'graphs_seq{SEQUENCE_LENGTH}_train.pkl')
+        else:
+            save_path = os.path.join(self.processed_dir, f'graphs_seq{SEQUENCE_LENGTH}_test.pkl')
+
         with open(save_path, 'wb') as f:
             pickle.dump(all_sequences, f)
+            
         print(f"Processing complete. Saved {len(all_sequences)} sequences to {save_path}.")
 
     def len(self):
