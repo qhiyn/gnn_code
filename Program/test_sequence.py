@@ -1,3 +1,4 @@
+# Program/test_sequence.py
 import os
 import argparse
 import torch
@@ -6,12 +7,14 @@ from torch_geometric.loader import DataLoader
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
 
-from Program.Utils.getdata_sequence import getGraphDataSequence
-from Program.Models.GCN_LSTM import GCN_LSTM
-from Program.Models.GAT_LSTM import GAT_LSTM
+from Utils.getdata_sequence import getGraphDataSequence
+from Models.GCN_LSTM import GCN_LSTM
+from Models.GAT_LSTM import GAT_LSTM
 
-TESTING_PATH = "/kaggle/input/nthu-ddd-graph/NTHU DDD GRAPH/Testing"
+# --- PERUBAHAN DI SINI ---
+PROCESSED_DATA_PATH = "/kaggle/input/graph-nthu-ddd/Processed_Data"
 OUTPUT_DIR = "/kaggle/working/Results"
+# -------------------------
 
 def test(model_name):
     torch.manual_seed(42)
@@ -19,7 +22,10 @@ def test(model_name):
 
     print(f"--- Starting SEQUENCE Testing for model: {model_name} ---")
 
-    dataset = getGraphDataSequence(data_path=TESTING_PATH, state='Testing')
+    # --- Muat data .pkl yang sudah diproses ---
+    dataset = getGraphDataSequence(
+        state='Testing'
+    )
     
     if len(dataset) == 0:
         print("Dataset is empty. Exiting.")
@@ -36,9 +42,12 @@ def test(model_name):
         return
     
     model = None
+    
     if model_name.upper() == 'GCN_LSTM':
+        print("Initializing GCN_LSTM model...")
         model = GCN_LSTM(input_shape=3, gcn_hidden_shape=16, lstm_hidden_shape=32, output_shape=2).to(device)
     elif model_name.upper() == 'GAT_LSTM':
+        print("Initializing GAT_LSTM model...")
         model = GAT_LSTM(input_shape=3, gat_hidden_shape=16, heads=4, lstm_hidden_shape=32, output_shape=2).to(device)
     else:
         print(f"Error: Model '{model_name}' not recognized.")
@@ -93,4 +102,5 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, required=True, choices=['GCN_LSTM', 'GAT_LSTM'],
                         help="Model to test (GCN_LSTM or GAT_LSTM)")
     args = parser.parse_args()
+    
     test(model_name=args.model)

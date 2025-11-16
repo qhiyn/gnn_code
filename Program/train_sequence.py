@@ -1,3 +1,4 @@
+# Program/train_sequence.py
 import os
 import argparse
 import torch
@@ -6,12 +7,15 @@ import torch.nn as nn
 from torch_geometric.loader import DataLoader
 import matplotlib.pyplot as plt
 
-from Program.Utils.getdata_sequence import getGraphDataSequence
-from Program.Models.GCN_LSTM import GCN_LSTM
-from Program.Models.GAT_LSTM import GAT_LSTM
+from Utils.getdata_sequence import getGraphDataSequence
+from Models.GCN_LSTM import GCN_LSTM
+from Models.GAT_LSTM import GAT_LSTM
 
-TRAINING_PATH = "/kaggle/input/nthu-ddd-graph/NTHU DDD GRAPH/Training"
+# --- PERUBAHAN DI SINI ---
+# Path ke dataset .pkl baru yang kamu unggah
+PROCESSED_DATA_PATH = "/kaggle/input/graph-nthu-ddd/Processed_Data"
 OUTPUT_DIR = "/kaggle/working/Results"
+# -------------------------
 
 def train(model_name):
     torch.manual_seed(42)
@@ -19,7 +23,11 @@ def train(model_name):
     
     print(f"--- Starting SEQUENCE Training for model: {model_name} ---")
     
-    dataset = getGraphDataSequence(data_path=TRAINING_PATH, state='Training')
+    # --- Muat data .pkl yang sudah diproses ---
+    # Kita tidak lagi butuh data_path, cukup state
+    dataset = getGraphDataSequence(
+        state='Training'
+    )
     
     if len(dataset) == 0:
         print("Dataset is empty. Exiting.")
@@ -55,11 +63,8 @@ def train(model_name):
 
         for data in train_loader:
             data = data.to(device)
-            
             out = model(data)
-          
-            # data.y shape adalah [B, 1] atau [B], squeeze() untuk [B]
-            decoded_label = data.y.squeeze()
+            decoded_label = data.y.squeeze() # Squeeze from [B, 1] to [B]
 
             loss = loss_fn(out, decoded_label)
             loss_per_epoch += loss.item()

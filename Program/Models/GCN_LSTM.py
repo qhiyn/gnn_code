@@ -32,8 +32,7 @@ class GCN_LSTM(torch.nn.Module):
     def forward(self, data):
         x = data.x
         edge_index = data.edge_index
-        batch = data.batch 
-
+        
         # x shape dari loader: [B, T, N, F]
         B, T, N, F = x.shape
         
