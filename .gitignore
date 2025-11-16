@@ -1,0 +1,45 @@
+# ########## Python Cache ##########
+# Abaikan file cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ########## Editor/OS Files ##########
+# Abaikan file spesifik macOS
+.DS_Store
+# Abaikan file spesifik VSCode
+.vscode/
+
+# ########## Data & Hasil yang Dihasilkan ##########
+#
+# Abaikan SELURUH folder 'processed', karena ini adalah cache
+# yang bisa dibuat ulang.
+/Datasets/processed/
+
+# Abaikan folder 'Results' tempat menyimpan model (.pth) 
+# dan gambar (.png)
+/Results/
+
+# ########## File Data Mentah ##########
+#
+# Abaikan semua file di dalam folder Training dan Testing
+# berdasarkan ekstensinya. Ini akan menjaga foldernya 
+# tetap ada, tapi kosong.
+/Datasets/Training/**/*.npz
+/Datasets/Testing/**/*.npz
+
+# Tambahkan juga ekstensi lain untuk berjaga-jaga
+/Datasets/**/*.avi
+/Datasets/**/*.mp4
+/Datasets/**/*.txt
+/Datasets/**/*.csv
+
+# ########## File Khusus (Opsional) ##########
+# Jika kamu punya file .pkl di luar folder 'processed'
+*.pkl
+
+# ########## Virtual Environment ##########
+# Jika kamu membuat virtual environment (venv) di dalam folder ini
+venv/
+/venv/
+.env
